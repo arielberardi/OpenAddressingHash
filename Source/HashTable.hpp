@@ -8,9 +8,9 @@ class HashTable
   public:
     struct Node
     {
-        KeyType Key{};
-        ValueType Value{};
-        bool IsOccupied{false};
+        KeyType key{};
+        ValueType value{};
+        bool isUsed{false};
     };
 
     struct Iterator
@@ -24,25 +24,25 @@ class HashTable
         using pointer = value_type*;
         using reference = value_type&;
 
-        Iterator(NodeIterator ptr, NodeIterator end) : m_Current(ptr), m_End(end)
+        Iterator(NodeIterator ptr, NodeIterator end) : m_current(ptr), m_end(end)
         {
-            FindNextValidNode();
+            findNextValidIterator();
         }
 
         reference operator*() const
         {
-            return *m_Current;
+            return *m_current;
         }
 
         pointer operator->() const
         {
-            return &(*m_Current);
+            return &(*m_current);
         }
 
         Iterator& operator++()
         {
-            ++m_Current;
-            FindNextValidNode();
+            ++m_current;
+            findNextValidIterator();
             return *this;
         }
 
@@ -55,7 +55,7 @@ class HashTable
 
         bool operator==(const Iterator& other)
         {
-            return m_Current == other.m_Current;
+            return m_current == other.m_current;
         }
 
         bool operator!=(const Iterator& other)
@@ -64,140 +64,140 @@ class HashTable
         }
 
       private:
-        NodeIterator m_Current;
-        NodeIterator m_End;
+        NodeIterator m_current;
+        NodeIterator m_end;
 
-        void FindNextValidNode()
+        void findNextValidIterator()
         {
-            while (m_Current != m_End && !m_Current->IsOccupied)
+            while (m_current != m_end && !m_current->isUsed)
             {
-                ++m_Current;
+                ++m_current;
             }
         }
     };
 
-    HashTable(size_t initialSize = HashTable::DEFAULT_CAPACITY,
-              float loadFactor = HashTable::DEFAULT_LOAD_FACTOR)
-        : m_InitialSize{initialSize}, m_Table{initialSize}, m_ElementsCount{0},
-          m_LoadFactor{loadFactor}
+    HashTable(size_t initialSize = HashTable::kDefaultCapacity,
+              float loadFactor = HashTable::kDefaultLoadFactor)
+        : m_initialSize{initialSize}, m_table{initialSize}, m_elementsCount{0},
+          m_loadFactor{loadFactor}
     {
     }
 
-    [[nodiscard]] constexpr bool IsEmpty() const noexcept
+    [[nodiscard]] constexpr bool isEmpty() const noexcept
     {
-        return m_ElementsCount == 0;
+        return m_elementsCount == 0;
     }
 
-    [[nodiscard]] constexpr size_t Count() const noexcept
+    [[nodiscard]] constexpr size_t count() const noexcept
     {
-        return m_ElementsCount;
+        return m_elementsCount;
     }
 
-    [[nodiscard]] constexpr size_t Size() const noexcept
+    [[nodiscard]] constexpr size_t size() const noexcept
     {
-        return m_Table.size();
+        return m_table.size();
     }
 
-    void Insert(const KeyType& key, const ValueType& value)
+    void insert(const KeyType& key, const ValueType& value)
     {
-        if (m_ElementsCount >= m_Table.size() * m_LoadFactor)
+        if (m_elementsCount >= m_table.size() * m_loadFactor)
         {
-            Resize();
+            resize();
         }
 
-        size_t hashValue = Hash(key);
+        size_t hashValue = hash(key);
         // TODO: Resolve collisions
-        m_Table[hashValue] = Node{.Key{key}, .Value{value}, .IsOccupied{true}};
+        m_table[hashValue] = Node{.key{key}, .value{value}, .isUsed{true}};
 
-        m_ElementsCount++;
+        m_elementsCount++;
     }
 
-    void Erase(const KeyType& key)
+    void erase(const KeyType& key)
     {
-        size_t hashValue = Hash(key);
+        size_t hashValue = hash(key);
 
-        Node& node = m_Table[hashValue];
-        if (!node.IsOccupied)
+        Node& node = m_table[hashValue];
+        if (!node.isUsed)
         {
             return;
         }
 
-        node.IsOccupied = false;
-        node.Key = KeyType{};
-        node.Value = ValueType{};
+        node.isUsed = false;
+        node.key = KeyType{};
+        node.value = ValueType{};
 
-        m_ElementsCount--;
+        m_elementsCount--;
     }
 
-    [[nodiscard]] constexpr bool Exists(const KeyType& key) const noexcept
+    [[nodiscard]] constexpr bool exists(const KeyType& key) const noexcept
     {
-        size_t hashValue = Hash(key);
-        Node node = m_Table[hashValue];
+        size_t hashValue = hash(key);
+        Node node = m_table[hashValue];
 
-        return node.IsOccupied;
+        return node.isUsed;
     }
 
-    [[nodiscard]] constexpr ValueType At(const KeyType& key) const noexcept
+    [[nodiscard]] constexpr ValueType at(const KeyType& key) const noexcept
     {
-        size_t hashValue = Hash(key);
+        size_t hashValue = hash(key);
 
-        Node node = m_Table[hashValue];
-        if (!node.IsOccupied)
+        Node node = m_table[hashValue];
+        if (!node.isUsed)
         {
             return ValueType{};
         }
 
-        return node.Value;
+        return node.value;
     }
 
     ValueType& operator[](const KeyType& key)
     {
-        size_t hashValue = Hash(key);
+        size_t hashValue = hash(key);
 
-        if (!m_Table[hashValue].IsOccupied)
+        if (!m_table[hashValue].isUsed)
         {
-            Insert(key, ValueType{});
+            insert(key, ValueType{});
         }
 
-        return m_Table[hashValue].Value;
+        return m_table[hashValue].value;
     }
 
-    void Clear()
+    void clear()
     {
-        m_Table.clear();
+        m_table.clear();
     }
 
-    std::vector<KeyType> Keys() const noexcept
+    std::vector<KeyType> keys() const noexcept
     {
         std::vector<KeyType> keys{};
-        keys.reserve(m_ElementsCount);
+        keys.reserve(m_elementsCount);
 
-        for (Node k : m_Table)
+        for (Node k : m_table)
         {
-            if (!k.IsOccupied)
+            if (!k.isUsed)
             {
                 continue;
             }
 
-            keys.push_back(k.Key);
+            keys.push_back(k.key);
         }
 
         return keys;
     }
 
-    std::vector<ValueType> Values() const noexcept
+    std::vector<ValueType> values() const noexcept
     {
         std::vector<ValueType> values{};
-        values.reserve(m_ElementsCount);
+        values.reserve(m_elementsCount);
 
-        for (Node k : m_Table)
+        for (Node k : m_table)
         {
-            if (!k.IsOccupied)
+            if (!k.isUsed)
             {
                 continue;
             }
 
-            values.push_back(k.Value);
+            values.push_back(k.value);
         }
 
         return values;
@@ -205,33 +205,33 @@ class HashTable
 
     Iterator begin()
     {
-        return Iterator(m_Table.begin(), m_Table.end());
+        return Iterator(m_table.begin(), m_table.end());
     }
 
     Iterator end()
     {
-        return Iterator(m_Table.end(), m_Table.end());
+        return Iterator(m_table.end(), m_table.end());
     }
 
   private:
-    static constexpr size_t DEFAULT_CAPACITY = 16;
-    static constexpr float DEFAULT_LOAD_FACTOR = 0.5f;
+    static constexpr size_t kDefaultCapacity = 16;
+    static constexpr float kDefaultLoadFactor = 0.5f;
 
-    std::vector<Node> m_Table;
+    std::vector<Node> m_table;
 
-    size_t m_InitialSize;
-    size_t m_ElementsCount;
-    float m_LoadFactor;
+    size_t m_initialSize;
+    size_t m_elementsCount;
+    float m_loadFactor;
 
-    size_t Hash(const KeyType& key) const noexcept
+    size_t hash(const KeyType& key) const noexcept
     {
-        return std::hash<KeyType>{}(key) % m_Table.size();
+        return std::hash<KeyType>{}(key) % m_table.size();
     }
 
-    void Resize()
+    void resize()
     {
         const size_t maxSize = std::numeric_limits<size_t>::max() - 1;
-        const size_t currentSize = m_Table.size();
+        const size_t currentSize = m_table.size();
         if (currentSize == maxSize)
         {
             return;
@@ -245,16 +245,16 @@ class HashTable
 
         std::vector<Node> newTable{newSize};
 
-        for (const Node& node : m_Table)
+        for (const Node& node : m_table)
         {
-            if (node.IsOccupied)
+            if (node.isUsed)
             {
-                size_t newHash = std::hash<KeyType>{}(node.Key) % newSize;
+                size_t newHash = std::hash<KeyType>{}(node.key) % newSize;
                 // TODO: Resolve collisions
                 newTable[newHash] = node;
             }
         }
 
-        m_Table = std::move(newTable);
+        m_table = std::move(newTable);
     }
 };
