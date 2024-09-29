@@ -13,18 +13,19 @@ class HashTable
         bool isUsed{false};
     };
 
-    struct Iterator
+    class Iterator
     {
-        using NodeIterator = typename std::vector<Node>::iterator;
-
-        // Alias with compatible name to the STL, won't follo my code conve
+      public:
+        // Alias using names compatible with STL algorithms
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = Node;
         using pointer = value_type*;
         using reference = value_type&;
 
-        Iterator(NodeIterator ptr, NodeIterator end) : m_current(ptr), m_end(end)
+        using NodeIterator = typename std::vector<Node>::iterator;
+
+        Iterator(NodeIterator ptr, std::vector<Node>::iterator end) : m_current(ptr), m_end(end)
         {
             findNextValidIterator();
         }
@@ -106,7 +107,13 @@ class HashTable
         }
 
         size_t hashValue = hash(key);
-        // TODO: Resolve collisions
+
+        // Linear probing
+        while (m_table[hashValue].isUsed)
+        {
+            hashValue = (hashValue + 1) % m_table.size();
+        }
+
         m_table[hashValue] = Node{.key{key}, .value{value}, .isUsed{true}};
 
         m_elementsCount++;
@@ -232,7 +239,8 @@ class HashTable
     {
         const size_t maxSize = std::numeric_limits<size_t>::max() - 1;
         const size_t currentSize = m_table.size();
-        if (currentSize == maxSize)
+
+        if (currentSize >= maxSize)
         {
             return;
         }
@@ -249,9 +257,15 @@ class HashTable
         {
             if (node.isUsed)
             {
-                size_t newHash = std::hash<KeyType>{}(node.key) % newSize;
-                // TODO: Resolve collisions
-                newTable[newHash] = node;
+                size_t hashValue = std::hash<KeyType>{}(node.key) % newSize;
+
+                // Linear probing
+                while (newTable[hashValue].isUsed)
+                {
+                    hashValue = (hashValue + 1) % newSize;
+                }
+
+                newTable[hashValue] = node;
             }
         }
 
