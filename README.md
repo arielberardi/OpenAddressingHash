@@ -1,5 +1,6 @@
 # Open Addressing Hash
 
+My own HashTable implementation as a Study Case of making a data structure compatible with STL Algorithms and Ranges
 
 ## Getting Started
 
@@ -9,7 +10,6 @@ To build and run OpenAddressingHash, you will need:
 
 - **C++20 compatible compiler**
 - **CMake** (version 3.20 or higher)
-- **Google Test** (automatically fetched via CMake if not present)
 
 ### Setup
 
@@ -29,12 +29,6 @@ To build and run OpenAddressingHash, you will need:
 3. **Build the project**:
    ```bash
    cmake --build .
-   ```
-
-4. **Run Tests**:
-   TradeZest uses Google Test for unit testing. To run the tests:
-   ```bash
-   ctest
    ```
 
 ### Running the Application

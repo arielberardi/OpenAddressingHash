@@ -94,7 +94,8 @@
         "syncstream": "cpp",
         "thread": "cpp",
         "typeindex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "hash_map": "cpp"
     },
     "editor.insertSpaces": true,
     "editor.comments.insertSpace": true,
@@ -108,7 +109,7 @@
     "editor.useTabStops": true,
     "editor.bracketPairColorization.enabled": true,
     "editor.rulers": [
-        120
+        100
     ],
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "xaver.clang-format",
