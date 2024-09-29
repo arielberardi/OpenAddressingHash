@@ -2,6 +2,69 @@
 #include <utility>
 #include <vector>
 
+template <typename NodeType, typename NodeIteratorType>
+class NodeIterator
+{
+  public:
+    // Alias using names compatible with STL algorithms
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = NodeType;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    NodeIterator(NodeIteratorType ptr, NodeIteratorType end) : m_current(ptr), m_end(end)
+    {
+        findNextValidNode();
+    }
+
+    reference operator*() const
+    {
+        return *m_current;
+    }
+
+    pointer operator->() const
+    {
+        return &(*m_current);
+    }
+
+    NodeIterator& operator++()
+    {
+        ++m_current;
+        findNextValidNode();
+        return *this;
+    }
+
+    NodeIterator operator++(int)
+    {
+        NodeIterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    bool operator==(const NodeIterator& other)
+    {
+        return m_current == other.m_current;
+    }
+
+    bool operator!=(const NodeIterator& other)
+    {
+        return !(*this == other);
+    }
+
+  private:
+    NodeIteratorType m_current;
+    NodeIteratorType m_end;
+
+    void findNextValidNode()
+    {
+        while (m_current != m_end && !m_current->isUsed)
+        {
+            ++m_current;
+        }
+    }
+};
+
 template <typename KeyType, typename ValueType>
 class HashTable
 {
@@ -13,69 +76,8 @@ class HashTable
         bool isUsed{false};
     };
 
-    class Iterator
-    {
-      public:
-        // Alias using names compatible with STL algorithms
-        using iterator_category = std::forward_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = Node;
-        using pointer = value_type*;
-        using reference = value_type&;
-
-        using NodeIterator = typename std::vector<Node>::iterator;
-
-        Iterator(NodeIterator ptr, std::vector<Node>::iterator end) : m_current(ptr), m_end(end)
-        {
-            findNextValidIterator();
-        }
-
-        reference operator*() const
-        {
-            return *m_current;
-        }
-
-        pointer operator->() const
-        {
-            return &(*m_current);
-        }
-
-        Iterator& operator++()
-        {
-            ++m_current;
-            findNextValidIterator();
-            return *this;
-        }
-
-        Iterator operator++(int)
-        {
-            Iterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-        bool operator==(const Iterator& other)
-        {
-            return m_current == other.m_current;
-        }
-
-        bool operator!=(const Iterator& other)
-        {
-            return !(*this == other);
-        }
-
-      private:
-        NodeIterator m_current;
-        NodeIterator m_end;
-
-        void findNextValidIterator()
-        {
-            while (m_current != m_end && !m_current->isUsed)
-            {
-                ++m_current;
-            }
-        }
-    };
+    using Iterator = NodeIterator<Node, typename std::vector<Node>::iterator>;
+    using ConstIterator = NodeIterator<const Node, typename std::vector<Node>::const_iterator>;
 
     HashTable(size_t initialSize = HashTable::kDefaultCapacity,
               float loadFactor = HashTable::kDefaultLoadFactor)
@@ -123,7 +125,7 @@ class HashTable
     {
         size_t hashValue = hash(key);
 
-        Node& node = m_table[hashValue];
+        auto& node = m_table[hashValue];
         if (!node.isUsed)
         {
             return;
@@ -139,7 +141,7 @@ class HashTable
     [[nodiscard]] constexpr bool exists(const KeyType& key) const noexcept
     {
         size_t hashValue = hash(key);
-        Node node = m_table[hashValue];
+        auto node = m_table[hashValue];
 
         return node.isUsed;
     }
@@ -148,7 +150,7 @@ class HashTable
     {
         size_t hashValue = hash(key);
 
-        Node node = m_table[hashValue];
+        auto node = m_table[hashValue];
         if (!node.isUsed)
         {
             return ValueType{};
@@ -179,14 +181,14 @@ class HashTable
         std::vector<KeyType> keys{};
         keys.reserve(m_elementsCount);
 
-        for (Node k : m_table)
+        for (auto node : m_table)
         {
-            if (!k.isUsed)
+            if (!node.isUsed)
             {
                 continue;
             }
 
-            keys.push_back(k.key);
+            keys.push_back(node.key);
         }
 
         return keys;
@@ -197,14 +199,14 @@ class HashTable
         std::vector<ValueType> values{};
         values.reserve(m_elementsCount);
 
-        for (Node k : m_table)
+        for (auto node : m_table)
         {
-            if (!k.isUsed)
+            if (!node.isUsed)
             {
                 continue;
             }
 
-            values.push_back(k.value);
+            values.push_back(node.value);
         }
 
         return values;
@@ -218,6 +220,16 @@ class HashTable
     Iterator end()
     {
         return Iterator(m_table.end(), m_table.end());
+    }
+
+    ConstIterator cbegin() const
+    {
+        return ConstIterator(m_table.begin(), m_table.end());
+    }
+
+    ConstIterator cend() const
+    {
+        return ConstIterator(m_table.end(), m_table.end());
     }
 
   private:
@@ -253,7 +265,7 @@ class HashTable
 
         std::vector<Node> newTable{newSize};
 
-        for (const Node& node : m_table)
+        for (const auto& node : m_table)
         {
             if (node.isUsed)
             {
