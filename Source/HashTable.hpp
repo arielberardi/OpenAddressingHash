@@ -80,12 +80,12 @@ class HashTable
     using ConstIterator = NodeIterator<const Node, typename std::vector<Node>::const_iterator>;
 
     HashTable(size_t initialSize = kDefaultCapacity, float loadFactor = kDefaultLoadFactor)
-        : m_table{initialSize}, m_initialSize{initialSize}, m_loadFactor{loadFactor}
+        : m_table{initialSize}, m_loadFactor{loadFactor}
     {
     }
 
     HashTable(std::initializer_list<Node> nodes)
-        : m_table{nodes.size()}, m_initialSize{nodes.size()}, m_loadFactor{kDefaultLoadFactor}
+        : m_table{nodes.size()}, m_loadFactor{kDefaultLoadFactor}
     {
         for (const Node& n : nodes)
         {
@@ -117,7 +117,7 @@ class HashTable
 
         size_t hashValue = hash(key);
 
-        // Linear probing
+        // Re-hash until find a free slot
         while (m_table[hashValue].isUsed)
         {
             hashValue = (hashValue + 1) % m_table.size();
@@ -132,12 +132,18 @@ class HashTable
     {
         size_t hashValue = hash(key);
 
-        auto& node = m_table[hashValue];
-        if (!node.isUsed)
+        if (!m_table[hashValue].isUsed)
         {
             return;
         }
 
+        // We re-hash the value until we find the key
+        while (m_table[hashValue].key != key)
+        {
+            hashValue = (hashValue + 1) % m_table.size();
+        }
+
+        Node& node = m_table[hashValue];
         node.isUsed = false;
         node.key = KeyType{};
         node.value = ValueType{};
@@ -148,22 +154,32 @@ class HashTable
     [[nodiscard]] constexpr bool exists(const KeyType& key) const noexcept
     {
         size_t hashValue = hash(key);
-        auto node = m_table[hashValue];
 
-        return node.isUsed;
+        // We re-hash the value until we find the correct key
+        while (m_table[hashValue].key != key)
+        {
+            hashValue = (hashValue + 1) % m_table.size();
+        }
+
+        return m_table[hashValue].isUsed;
     }
 
     [[nodiscard]] constexpr ValueType at(const KeyType& key) const noexcept
     {
         size_t hashValue = hash(key);
 
-        auto node = m_table[hashValue];
-        if (!node.isUsed)
+        if (!m_table[hashValue].isUsed)
         {
             return ValueType{};
         }
 
-        return node.value;
+        // We re-hash the value until we find the correct key
+        while (m_table[hashValue].key != key)
+        {
+            hashValue = (hashValue + 1) % m_table.size();
+        }
+
+        return m_table[hashValue].value;
     }
 
     ValueType& operator[](const KeyType& key)
@@ -173,6 +189,12 @@ class HashTable
         if (!m_table[hashValue].isUsed)
         {
             insert(key, ValueType{});
+        }
+
+        // We re-hash the value until we find the correct key
+        while (m_table[hashValue].key != key)
+        {
+            hashValue = (hashValue + 1) % m_table.size();
         }
 
         return m_table[hashValue].value;
@@ -244,8 +266,6 @@ class HashTable
     static constexpr float kDefaultLoadFactor = 0.5f;
 
     std::vector<Node> m_table;
-
-    size_t m_initialSize;
     size_t m_elementsCount{0};
     float m_loadFactor;
 
@@ -278,7 +298,7 @@ class HashTable
             {
                 size_t hashValue = std::hash<KeyType>{}(node.key) % newSize;
 
-                // Linear probing
+                // We re-hash until we find a free slot
                 while (newTable[hashValue].isUsed)
                 {
                     hashValue = (hashValue + 1) % newSize;
