@@ -130,17 +130,14 @@ int main()
     std::cout << products["Banana"] << std::endl;
     std::cout << products.at("Watermelon") << std::endl;
 
-    // TODO: Initializer list for pairs
-    /*
     // Insert new elements at the constructor
     HashTable<int, std::string> letters{{0, "A"}, {1, "B"}};
 
-    if (letters.IsEmpty())
+    if (letters.isEmpty())
     {
         std::cerr << "Hash Table should NOT be empty by now" << std::endl;
     }
 
     std::cout << letters[0] << std::endl;
     std::cout << letters.at(1) << std::endl;
-    */
 }

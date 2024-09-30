@@ -79,11 +79,18 @@ class HashTable
     using Iterator = NodeIterator<Node, typename std::vector<Node>::iterator>;
     using ConstIterator = NodeIterator<const Node, typename std::vector<Node>::const_iterator>;
 
-    HashTable(size_t initialSize = HashTable::kDefaultCapacity,
-              float loadFactor = HashTable::kDefaultLoadFactor)
-        : m_table{initialSize}, m_initialSize{initialSize}, m_elementsCount{0},
-          m_loadFactor{loadFactor}
+    HashTable(size_t initialSize = kDefaultCapacity, float loadFactor = kDefaultLoadFactor)
+        : m_table{initialSize}, m_initialSize{initialSize}, m_loadFactor{loadFactor}
     {
+    }
+
+    HashTable(std::initializer_list<Node> nodes)
+        : m_table{nodes.size()}, m_initialSize{nodes.size()}, m_loadFactor{kDefaultLoadFactor}
+    {
+        for (const Node& n : nodes)
+        {
+            insert(n.key, n.value);
+        }
     }
 
     [[nodiscard]] constexpr bool isEmpty() const noexcept
@@ -181,7 +188,7 @@ class HashTable
         std::vector<KeyType> keys{};
         keys.reserve(m_elementsCount);
 
-        for (auto node : m_table)
+        for (const Node& node : m_table)
         {
             if (!node.isUsed)
             {
@@ -199,7 +206,7 @@ class HashTable
         std::vector<ValueType> values{};
         values.reserve(m_elementsCount);
 
-        for (auto node : m_table)
+        for (const Node& node : m_table)
         {
             if (!node.isUsed)
             {
@@ -239,7 +246,7 @@ class HashTable
     std::vector<Node> m_table;
 
     size_t m_initialSize;
-    size_t m_elementsCount;
+    size_t m_elementsCount{0};
     float m_loadFactor;
 
     size_t hash(const KeyType& key) const noexcept
@@ -265,7 +272,7 @@ class HashTable
 
         std::vector<Node> newTable{newSize};
 
-        for (const auto& node : m_table)
+        for (const Node& node : m_table)
         {
             if (node.isUsed)
             {
