@@ -1,6 +1,14 @@
-# Open Addressing Hash
+# Open Addressing Hash (WIP)
 
-My own HashTable implementation as a Study Case of making a data structure compatible with STL Algorithms and Ranges
+Study case of an Hash Table implementation using Modern C++
+
+Expectation is for this class to be compatible with STL Algorithms and also Ranges
+
+I'm taking the time on testing and having next questions answered:
+   - Performance & Memory Managment: Vector vs Array
+   - Performance: Raw Loops vs STL Algorithms
+   - Performance: Differneces between algorithms for Open Addressing Collision resolution
+   - Memory managment: Avoid creation and copy of objects when possible
 
 ## Getting Started
 
