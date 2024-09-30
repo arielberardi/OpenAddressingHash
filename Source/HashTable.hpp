@@ -155,6 +155,11 @@ class HashTable
     {
         size_t hashValue = hash(key);
 
+        if (!m_table[hashValue].isUsed)
+        {
+            return false;
+        }
+
         // We re-hash the value until we find the correct key
         while (m_table[hashValue].key != key)
         {
