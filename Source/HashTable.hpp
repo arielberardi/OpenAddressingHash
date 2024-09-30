@@ -81,7 +81,7 @@ class HashTable
 
     HashTable(size_t initialSize = HashTable::kDefaultCapacity,
               float loadFactor = HashTable::kDefaultLoadFactor)
-        : m_initialSize{initialSize}, m_table{initialSize}, m_elementsCount{0},
+        : m_table{initialSize}, m_initialSize{initialSize}, m_elementsCount{0},
           m_loadFactor{loadFactor}
     {
     }
@@ -176,7 +176,7 @@ class HashTable
         m_table.clear();
     }
 
-    std::vector<KeyType> keys() const noexcept
+    [[nodiscard]] std::vector<KeyType> keys() const noexcept
     {
         std::vector<KeyType> keys{};
         keys.reserve(m_elementsCount);
@@ -194,7 +194,7 @@ class HashTable
         return keys;
     }
 
-    std::vector<ValueType> values() const noexcept
+    [[nodiscard]] std::vector<ValueType> values() const noexcept
     {
         std::vector<ValueType> values{};
         values.reserve(m_elementsCount);
@@ -212,22 +212,22 @@ class HashTable
         return values;
     }
 
-    Iterator begin()
+    [[nodiscard]] Iterator begin()
     {
         return Iterator(m_table.begin(), m_table.end());
     }
 
-    Iterator end()
+    [[nodiscard]] Iterator end()
     {
         return Iterator(m_table.end(), m_table.end());
     }
 
-    ConstIterator cbegin() const
+    [[nodiscard]] ConstIterator cbegin() const
     {
         return ConstIterator(m_table.begin(), m_table.end());
     }
 
-    ConstIterator cend() const
+    [[nodiscard]] ConstIterator cend() const
     {
         return ConstIterator(m_table.end(), m_table.end());
     }
