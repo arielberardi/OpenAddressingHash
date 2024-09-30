@@ -84,12 +84,12 @@ class HashTable
     {
     }
 
-    HashTable(std::initializer_list<Node> nodes)
+    HashTable(std::initializer_list<std::pair<KeyType, ValueType>> nodes)
         : m_table{nodes.size()}, m_loadFactor{kDefaultLoadFactor}
     {
-        for (const Node& n : nodes)
+        for (const auto& n : nodes)
         {
-            insert(n.key, n.value);
+            insert(n.first, n.second);
         }
     }
 
