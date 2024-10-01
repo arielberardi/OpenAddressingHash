@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <format>
 #include <iostream>
 #include <string>
@@ -208,6 +209,8 @@ void test_moveAssigment()
 
 int main()
 {
+    auto start = std::chrono::high_resolution_clock::now();
+
     test_emptyInsertGetCount();
     test_exists();
     test_getKeys();
@@ -222,6 +225,9 @@ int main()
     test_moveConstructor();
     test_moveAssigment();
 
-    std::cout << "If we are here, all test have passed!!!" << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> delta = (end - start) * 1000;
+
+    std::cout << "All tests have passed in " << delta.count() << "ms" << std::endl;
     return 0;
 }
