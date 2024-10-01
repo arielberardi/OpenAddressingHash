@@ -154,6 +154,58 @@ void test_initializationList()
     std::cout << "test_initializationList: End" << std::endl;
 }
 
+void test_copyConstructor()
+{
+    std::cout << "test_copyConstructor: Start" << std::endl;
+
+    HashTable<std::string, int> products{{"Banana", 3}, {"Watermelon", 1}};
+    HashTable<std::string, int> p{products};
+
+    assert(p["Banana"] == 3);
+
+    std::cout << "test_copyConstructor: End" << std::endl;
+}
+
+void test_copyAssigment()
+{
+    std::cout << "test_copyAssigment: Start" << std::endl;
+
+    HashTable<std::string, int> products{{"Banana", 3}, {"Watermelon", 1}};
+    HashTable<std::string, int> p{{"Apple", 2}, {"Apricot", 10}};
+    p = products;
+
+    assert(p["Banana"] == 3);
+    assert(p["Watermelon"] == 1);
+
+    std::cout << "test_copyAssigment: End" << std::endl;
+}
+
+void test_moveConstructor()
+{
+    std::cout << "test_moveConstructor: Start" << std::endl;
+
+    HashTable<std::string, int> products{{"Banana", 3}, {"Watermelon", 1}};
+    HashTable<std::string, int> p{std::move(products)};
+
+    assert(p["Banana"] == 3);
+
+    std::cout << "test_moveConstructor: End" << std::endl;
+}
+
+void test_moveAssigment()
+{
+    std::cout << "test_moveAssigment: Start" << std::endl;
+
+    HashTable<std::string, int> products{{"Banana", 3}, {"Watermelon", 1}};
+    HashTable<std::string, int> p{{"Apple", 2}, {"Apricot", 10}};
+    p = std::move(products);
+
+    assert(p["Banana"] == 3);
+    assert(p["Watermelon"] == 1);
+
+    std::cout << "test_moveAssigment: End" << std::endl;
+}
+
 int main()
 {
     test_emptyInsertGetCount();
@@ -164,6 +216,11 @@ int main()
     test_iterators();
     test_insertWithSubscriptOperator();
     test_initializationList();
+
+    test_copyConstructor();
+    test_copyAssigment();
+    test_moveConstructor();
+    test_moveAssigment();
 
     std::cout << "If we are here, all test have passed!!!" << std::endl;
     return 0;

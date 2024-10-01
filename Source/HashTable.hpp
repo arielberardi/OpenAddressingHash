@@ -82,16 +82,61 @@ class HashTable
     HashTable(size_t initialSize = kDefaultCapacity, float loadFactor = kDefaultLoadFactor)
         : m_table{initialSize}, m_loadFactor{loadFactor}
     {
+        // std::cout << "" << std::endl;
     }
 
     HashTable(std::initializer_list<std::pair<KeyType, ValueType>> nodes)
         : m_table{nodes.size()}, m_loadFactor{kDefaultLoadFactor}
     {
+        // std::cout << "Constructor Initializer List!" << std::endl;
         for (const auto& n : nodes)
         {
             insert(n.first, n.second);
         }
     }
+
+    /*
+    HashTable(HashTable& other) : m_table{other.m_table}, m_loadFactor{other.m_loadFactor}
+    {
+        std::cout << "Copy constructor!" << std::endl;
+    }
+
+    HashTable& operator=(HashTable& other)
+    {
+        std::cout << "Copy Assigment!" << std::endl;
+
+        m_table.clear();
+
+        m_table = other.m_table;
+        m_loadFactor = other.m_loadFactor;
+
+        other.m_table.clear();
+        other.m_loadFactor = 0;
+
+        return *this;
+    }
+
+    HashTable(HashTable&& other)
+        : m_table{std::move(other.m_table)}, m_loadFactor{other.m_loadFactor}
+    {
+        std::cout << "Move constructor!" << std::endl;
+    }
+
+    HashTable& operator=(HashTable&& other)
+    {
+        std::cout << "Move Assigment!" << std::endl;
+
+        m_table.clear();
+
+        m_table = std::move(other.m_table);
+        m_loadFactor = other.m_loadFactor;
+
+        other.m_table.clear();
+        other.m_loadFactor = 0;
+
+        return *this;
+    }
+    */
 
     [[nodiscard]] constexpr bool isEmpty() const noexcept
     {
@@ -123,7 +168,7 @@ class HashTable
             hashValue = (hashValue + 1) % m_table.size();
         }
 
-        m_table[hashValue] = Node{.key{key}, .value{value}, .isUsed{true}};
+        m_table[hashValue] = std::move(Node(key, value, true));
 
         m_elementsCount++;
     }
@@ -222,10 +267,10 @@ class HashTable
                 continue;
             }
 
-            keys.push_back(node.key);
+            keys.emplace_back(node.key);
         }
 
-        return keys;
+        return std::move(keys);
     }
 
     [[nodiscard]] std::vector<ValueType> values() const noexcept
@@ -240,10 +285,10 @@ class HashTable
                 continue;
             }
 
-            values.push_back(node.value);
+            values.emplace_back(node.value);
         }
 
-        return values;
+        return std::move(values);
     }
 
     [[nodiscard]] Iterator begin()
