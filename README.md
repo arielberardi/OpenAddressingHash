@@ -1,15 +1,15 @@
 # Open Addressing Hash (WIP)
 
-Study case of an Hash Table implementation using Modern C++
+Study case of a Hash Table implementation using Modern C++ with iterators and compatible with STL
 
-Expectation is for this class to be compatible with STL Algorithms and also Ranges
+Some interesting references I use for this code:
 
-I'm taking the time on testing and having next questions answered:
-   - Performance & Memory Managment: Vector vs Array
-   - Performance: Raw Loops vs STL Algorithms
-   - Performance: Differneces between algorithms for Open Addressing Collision resolution
-   - Memory managment: Avoid creation and copy of objects when possible
-
+- Move Semantics: https://www.youtube.com/watch?v=ehMg6zvXuMY & https://www.youtube.com/watch?v=OWNeCTd7yQE
+- No Discard: https://www.youtube.com/watch?v=yKVxz32A5Ck)
+- Templates: https://www.youtube.com/watch?v=HqsEHG0QJXU
+- CPP References: https://en.cppreference.com/w/
+- Learn C++: https://www.learncpp.com/
+  
 ## Getting Started
 
 ### Prerequisites
