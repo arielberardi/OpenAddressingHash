@@ -1,4 +1,5 @@
 #include <limits>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -260,15 +261,21 @@ class HashTable
         std::vector<KeyType> keys{};
         keys.reserve(m_elementsCount);
 
-        for (const Node& node : m_table)
-        {
-            if (!node.isUsed)
-            {
-                continue;
-            }
+        // for (const Node& node : m_table)
+        // {
+        //     if (!node.isUsed)
+        //     {
+        //         continue;
+        //     }
 
-            keys.emplace_back(node.key);
-        }
+        //     keys.emplace_back(node.key);
+        // }
+
+        auto usedNode = [](const Node& n) { return n.isUsed; };
+        auto getKey = [](const Node& n) { return n.key; };
+
+        std::ranges::copy(m_table | std::views::filter(usedNode) | std::views::transform(getKey),
+                          std::back_inserter(keys));
 
         return std::move(keys);
     }
@@ -278,15 +285,21 @@ class HashTable
         std::vector<ValueType> values{};
         values.reserve(m_elementsCount);
 
-        for (const Node& node : m_table)
-        {
-            if (!node.isUsed)
-            {
-                continue;
-            }
+        // for (const Node& node : m_table)
+        // {
+        //     if (!node.isUsed)
+        //     {
+        //         continue;
+        //     }
 
-            values.emplace_back(node.value);
-        }
+        //     values.emplace_back(node.value);
+        // }
+
+        auto usedNode = [](const Node& n) { return n.isUsed; };
+        auto getValue = [](const Node& n) { return n.value; };
+
+        std::ranges::copy(m_table | std::views::filter(usedNode) | std::views::transform(getValue),
+                          std::back_inserter(values));
 
         return std::move(values);
     }
@@ -340,23 +353,40 @@ class HashTable
             newSize = maxSize;
         }
 
-        std::vector<Node> newTable{newSize};
+        std::vector<Node> newTable;
+        newTable.resize(newSize);
 
-        for (const Node& node : m_table)
+        auto insertInNewTable = [&](const Node& node)
         {
-            if (node.isUsed)
+            size_t hashValue = std::hash<KeyType>{}(node.key) % newSize;
+
+            // We re-hash until we find a free slot
+            while (newTable[hashValue].isUsed)
             {
-                size_t hashValue = std::hash<KeyType>{}(node.key) % newSize;
-
-                // We re-hash until we find a free slot
-                while (newTable[hashValue].isUsed)
-                {
-                    hashValue = (hashValue + 1) % newSize;
-                }
-
-                newTable[hashValue] = node;
+                hashValue = (hashValue + 1) % newSize;
             }
-        }
+
+            newTable[hashValue] = node;
+        };
+
+        std::ranges::for_each(m_table | std::views::filter([](const Node& n) { return n.isUsed; }),
+                              insertInNewTable);
+
+        // for (const Node& node : m_table)
+        // {
+        //     if (node.isUsed)
+        //     {
+        //         size_t hashValue = std::hash<KeyType>{}(node.key) % newSize;
+
+        //         // We re-hash until we find a free slot
+        //         while (newTable[hashValue].isUsed)
+        //         {
+        //             hashValue = (hashValue + 1) % newSize;
+        //         }
+
+        //         newTable[hashValue] = node;
+        //     }
+        // }
 
         m_table = std::move(newTable);
     }
